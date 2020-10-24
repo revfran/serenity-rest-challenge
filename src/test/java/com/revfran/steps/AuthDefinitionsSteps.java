@@ -12,28 +12,81 @@ import java.util.Map;
 
 public class AuthDefinitionsSteps {
 
+    private final String API_V1_VERSION = "v1.1";
+    private final String API_V2_VERSION = "v2";
+
+    public enum ApiVersion {
+        API_V1_VERSION, API_V2_VERSION
+    }
 
     /**
-     * Do a request to https://api.twitter.com/2/tweets/{tweetId}
+     * Do a request to get a tweet by ID
      *
      * @param token   Bearer token to use
      * @param tweetId TweetId for the url
      */
-    public void retrieveTweetInformation(String token, String tweetId) {
-        if (StringUtils.isEmpty(token) || StringUtils.isEmpty(tweetId)) {
-            throw new CucumberException("Invalid required token or tweetId");
+    public void retrieveTweetInformation(String gherkinApiVersion, String token, String tweetId) {
+        if (StringUtils.isEmpty(gherkinApiVersion) || StringUtils.isEmpty(token) || StringUtils.isEmpty(tweetId)) {
+            throw new CucumberException("Invalid required gherkinApiVersion, token or tweetId");
+        }
+
+        ApiVersion apiVersion = resolveAPIversionFromGherkin(gherkinApiVersion);
+
+        String tweetIdUrl;
+        switch (apiVersion) {
+            case API_V1_VERSION:
+                tweetIdUrl = "https://api.twitter.com/1.1/statuses/show.json?id=" + tweetId;
+                break;
+            case API_V2_VERSION: default:
+                tweetIdUrl = "https://api.twitter.com/2/tweets/" + tweetId;
+                break;
         }
 
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", String.format("Bearer %s", token));
 
-        SerenityRest.given().contentType("application/json")
+        Response response = SerenityRest.given().contentType("application/json")
                 .headers(headers)
                 .when()
-                .get("https://api.twitter.com/2/tweets/" + tweetId);
+                .get(tweetIdUrl);
 
-        Response response = SerenityRest.then().extract().response();
         Serenity.setSessionVariable(SerenityVariables.RESPONSE_CODE_SESSION_VAR_NAME).to(response.statusCode());
         Serenity.setSessionVariable(SerenityVariables.RESPONSE_BODY_SESSION_VAR_NAME).to(response.body().print());
+    }
+
+    /**
+     * Do a request to get home_timeline information
+     *
+     * @param gherkinApiVersion
+     * @param token
+     */
+    public void retrieveHomeTimeline(String gherkinApiVersion, String token) {
+        if ( StringUtils.isEmpty(token)) {
+            throw new CucumberException("Invalid required token");
+        }
+
+        // TODO: throw CucumberException with apiV2
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", String.format("Bearer %s", token));
+
+        Response response = SerenityRest.given().contentType("application/json")
+                .headers(headers)
+                .when()
+                .get("https://api.twitter.com/1.1/statuses/home_timeline.json");
+
+        Serenity.setSessionVariable(SerenityVariables.RESPONSE_CODE_SESSION_VAR_NAME).to(response.statusCode());
+        Serenity.setSessionVariable(SerenityVariables.RESPONSE_BODY_SESSION_VAR_NAME).to(response.body().print());
+    }
+
+    private ApiVersion resolveAPIversionFromGherkin(String version) {
+        switch (version) {
+            case API_V1_VERSION:
+                return ApiVersion.API_V1_VERSION;
+            case API_V2_VERSION:
+                return ApiVersion.API_V2_VERSION;
+            default:
+                throw new CucumberException(String.format("Unknown API version: '%s'", version));
+        }
     }
 }

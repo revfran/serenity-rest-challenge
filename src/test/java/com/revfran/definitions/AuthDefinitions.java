@@ -24,10 +24,10 @@ public class AuthDefinitions {
         this.tokenSteps.checkAndSetToken();
     }
 
-    @When("a GET request to get tweet {string} is done with token {string}")
-    public void aGETRequestToGetTweetIsDoneWithToken(String tweetID, String gherkinToken) {
+    @When("a {string} request to get tweet {string} is done with token {string}")
+    public void aGETRequestToGetTweetIsDoneWithToken(String gherkinApiVersion, String tweetID, String gherkinToken) {
         String token = this.tokenSteps.resolveTokenFromGherkin(gherkinToken);
-        this.authDefinitionsSteps.retrieveTweetInformation(token,tweetID);
+        this.authDefinitionsSteps.retrieveTweetInformation(gherkinApiVersion, token, tweetID);
     }
 
     @Then("status code is {int}")
@@ -38,5 +38,11 @@ public class AuthDefinitions {
     @Then("response body contains param {string} with value {string}")
     public void responseBodyContainsParamWithValue(String param, String expectedValue) {
         this.assertionSteps.assertStringParamInBody(param, expectedValue);
+    }
+
+    @When("a {string} request to get home timeline is done with token {string}")
+    public void aRequestToGetHomeTimelineIsDoneWithToken(String gherkinApiVersion, String gherkinToken) {
+        String token = this.tokenSteps.resolveTokenFromGherkin(gherkinToken);
+        this.authDefinitionsSteps.retrieveHomeTimeline(gherkinApiVersion, token);
     }
 }

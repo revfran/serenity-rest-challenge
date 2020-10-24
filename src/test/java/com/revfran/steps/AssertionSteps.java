@@ -18,6 +18,6 @@ public class AssertionSteps {
         String body = Serenity.sessionVariableCalled(SerenityVariables.RESPONSE_BODY_SESSION_VAR_NAME);
 
         JsonPath jsonBody = JsonPath.from(body);
-        assertThat(String.format("Param '%s' mismatch", param), jsonBody.get(param), is(expectedValue));
+        assertThat(String.format("Param '%s' mismatch", param), jsonBody.getString(param), is(expectedValue));
     }
 }
