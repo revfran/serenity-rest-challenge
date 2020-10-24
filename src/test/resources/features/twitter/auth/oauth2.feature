@@ -43,10 +43,38 @@ Feature: oauth2 requests to twitter API
     Then status code is <ForbiddenStatusCode>
     And response body contains param "<ResponseParam>" with value "<ForbiddenErrorMessage>"
 
-  @Pending @twitter_auth:005 @bonus_invalidate_token
-  Scenario: Refresh bearer token invalidates previous token
-    When something
+    Examples:
+      | ApiVersion | Token            | ForbiddenStatusCode | ResponseParam     | ForbiddenErrorMessage                                 |
+      | v1.1       | CONFIGURED_TOKEN | 403                 | errors[0].message | Your credentials do not allow access to this resource |
 
-  @Pending @twitter_auth:006 @bonus_invalidate_token
-  Scenario: Refresh bearer token is not authorised with wrong credentials
-    When something
+
+  @twitter_auth:006 @bonus_invalidate_token
+  Scenario Outline: Unauthorised to invalidate bearer token with wrong credentials
+
+    When a request to invalidate token is done with token "<InvalidateToken>"
+    Then status code is <ForbiddenStatusCode>
+
+    When a "<ApiVersion>" request to get tweet "<TweetID>" is done with token "<Token>"
+    Then status code is <OkStatusCode>
+
+    Examples:
+      | InvalidateToken | ForbiddenStatusCode | ApiVersion | TweetID             | Token            | OkStatusCode |
+      | Invalid_token   | 403                 | v1.1       | 1319902909635715072 | CONFIGURED_TOKEN | 200          |
+      | Invalid_token   | 403                 | v2         | 1319902909635715072 | CONFIGURED_TOKEN | 200          |
+
+
+  @Pending @twitter_auth:005 @bonus_invalidate_token
+  Scenario Outline: Invalidate bearer token with valid credentials
+
+    When a request to invalidate token is done with token "<AccessToken>"
+    Then status code is <OkStatusCode>
+    And response body contains param "<InvalidateParam>" with value "<AccessToken>"
+
+    When a "<ApiVersion>" request to get tweet "<TweetID>" is done with token "<Token>"
+    Then status code is <UnauthorisedStatusCode>
+    And response body contains param "<ResponseParam>" with value "<UnauthorisedErrorTitle>"
+
+    Examples:
+      | AccessToken             | InvalidateParam | OkStatusCode | ApiVersion | TweetID             | Token            | UnauthorisedStatusCode | ResponseParam     | UnauthorisedErrorTitle    |
+      | CONFIGURED_ACCESS_TOKEN | 200             | 200          | v1.1       | 1319902909635715072 | CONFIGURED_TOKEN | 401                    | errors[0].message | Invalid or expired token. |
+      | CONFIGURED_ACCESS_TOKEN | 200             | 200          | v2         | 1319902909635715072 | CONFIGURED_TOKEN | 401                    | title             | Unauthorized              |

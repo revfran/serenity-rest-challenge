@@ -9,6 +9,7 @@ import java.util.Optional;
 public class TokenSteps {
 
     private static final String CONFIG_TOKEN_GHERKIN_NAME = "CONFIGURED_TOKEN";
+    private static final String CONFIG_ACCESS_TOKEN_GHERKIN_NAME = "CONFIGURED_ACCESS_TOKEN";
 
     /**
      * Checks if token is defined, and places it in a serenity session variable
@@ -16,11 +17,18 @@ public class TokenSteps {
      * @throws CucumberException if token is not defined
      */
     public void checkAndSetToken() throws CucumberException {
-        Optional<String> token = Optional.ofNullable(System.getProperty(SerenityVariables.TWITTER_TOKEN_ENV_NAME));
+        Optional<String> token = Optional.ofNullable(System.getProperty(SerenityVariables.TWITTER_BEARER_TOKEN_ENV_NAME));
         if (!token.isPresent()) {
-            throw new CucumberException(String.format("System property '%s' needs to be configured for the tests", SerenityVariables.TWITTER_TOKEN_ENV_NAME));
+            throw new CucumberException(String.format("System property '%s' needs to be configured for the tests", SerenityVariables.TWITTER_BEARER_TOKEN_ENV_NAME));
         }
-        Serenity.setSessionVariable(SerenityVariables.TWITTER_TOKEN_SESSION_VAR_NAME).to(token.get());
+
+        Optional<String> access_token = Optional.ofNullable(System.getProperty(SerenityVariables.TWITTER_ACCESS_TOKEN_ENV_NAME));
+        if (!access_token.isPresent()) {
+            throw new CucumberException(String.format("System property '%s' needs to be configured for the tests", SerenityVariables.TWITTER_ACCESS_TOKEN_ENV_NAME));
+        }
+
+        Serenity.setSessionVariable(SerenityVariables.TWITTER_BEARER_TOKEN_SESSION_VAR_NAME).to(token.get());
+        Serenity.setSessionVariable(SerenityVariables.TWITTER_ACCESS_TOKEN_SESSION_VAR_NAME).to(access_token.get());
     }
 
 
@@ -33,7 +41,10 @@ public class TokenSteps {
     public String resolveTokenFromGherkin(String gherkinToken) {
         String result;
         if (CONFIG_TOKEN_GHERKIN_NAME.equalsIgnoreCase(gherkinToken)) {
-            return Serenity.sessionVariableCalled(SerenityVariables.TWITTER_TOKEN_SESSION_VAR_NAME);
-        } else return gherkinToken;
+            return Serenity.sessionVariableCalled(SerenityVariables.TWITTER_BEARER_TOKEN_SESSION_VAR_NAME);
+        }else if(CONFIG_ACCESS_TOKEN_GHERKIN_NAME.equalsIgnoreCase(gherkinToken)){
+            return Serenity.sessionVariableCalled(SerenityVariables.TWITTER_ACCESS_TOKEN_SESSION_VAR_NAME);
+        }
+        else{ return gherkinToken;}
     }
 }

@@ -30,6 +30,18 @@ public class AuthDefinitions {
         this.authDefinitionsSteps.retrieveTweetInformation(gherkinApiVersion, token, tweetID);
     }
 
+    @When("a {string} request to get home timeline is done with token {string}")
+    public void aRequestToGetHomeTimelineIsDoneWithToken(String gherkinApiVersion, String gherkinToken) {
+        String token = this.tokenSteps.resolveTokenFromGherkin(gherkinToken);
+        this.authDefinitionsSteps.retrieveHomeTimeline(gherkinApiVersion, token);
+    }
+
+    @When("a request to invalidate token is done with token {string}")
+    public void aRequestToInvalidateTokenIsDone(String gherkinToken) {
+        String token = this.tokenSteps.resolveTokenFromGherkin(gherkinToken);
+        this.authDefinitionsSteps.requestInvalidateToken(token);
+    }
+
     @Then("status code is {int}")
     public void statusCodeIs(int statusCode) {
         this.assertionSteps.assertStatusCode(statusCode);
@@ -38,11 +50,5 @@ public class AuthDefinitions {
     @Then("response body contains param {string} with value {string}")
     public void responseBodyContainsParamWithValue(String param, String expectedValue) {
         this.assertionSteps.assertStringParamInBody(param, expectedValue);
-    }
-
-    @When("a {string} request to get home timeline is done with token {string}")
-    public void aRequestToGetHomeTimelineIsDoneWithToken(String gherkinApiVersion, String gherkinToken) {
-        String token = this.tokenSteps.resolveTokenFromGherkin(gherkinToken);
-        this.authDefinitionsSteps.retrieveHomeTimeline(gherkinApiVersion, token);
     }
 }
