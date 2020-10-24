@@ -65,7 +65,19 @@ public class AuthDefinitionsSteps {
             throw new CucumberException("Invalid required token");
         }
 
-        // TODO: throw CucumberException with apiV2
+
+        ApiVersion apiVersion = resolveAPIversionFromGherkin(gherkinApiVersion);
+
+        String homeTimelineUrl;
+        switch (apiVersion) {
+            case API_V1_VERSION:
+            default:
+                homeTimelineUrl = "https://api.twitter.com/1.1/statuses/home_timeline.json";
+                break;
+            case API_V2_VERSION:
+                // No endpoints for v2 without app auth as it is still in public beta
+                throw new CucumberException("No URL configured for v2 endpoint to retrieve home_timeline");
+        }
 
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", String.format("Bearer %s", token));
@@ -73,7 +85,7 @@ public class AuthDefinitionsSteps {
         Response response = SerenityRest.given().contentType("application/json")
                 .headers(headers)
                 .when()
-                .get("https://api.twitter.com/1.1/statuses/home_timeline.json");
+                .get(homeTimelineUrl);
 
         Serenity.setSessionVariable(SerenityVariables.RESPONSE_CODE_SESSION_VAR_NAME).to(response.statusCode());
         Serenity.setSessionVariable(SerenityVariables.RESPONSE_BODY_SESSION_VAR_NAME).to(response.body().print());

@@ -12,6 +12,8 @@ $ mvn -DTW_TOKEN=${TWITTER_API_TOKEN} test serenity:aggregate
 
 Reports will be available after execution in [./target/site/serenity/index.html]
 
+Sample reports are available at [index.html](./sampleExecution/index.html)
+
 # Description of the building process
 
 - Start from maven-quick-start archetype

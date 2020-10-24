@@ -43,10 +43,6 @@ Feature: oauth2 requests to twitter API
     Then status code is <ForbiddenStatusCode>
     And response body contains param "<ResponseParam>" with value "<ForbiddenErrorMessage>"
 
-  @Pending @twitter_auth:005 @bonus_invalidate_token
-  Scenario: Refresh bearer token invalidates previous token
-    When something
-
-  @Pending @twitter_auth:006 @bonus_invalidate_token
-  Scenario: Refresh bearer token is not authorised with wrong credentials
-    When something
+    Examples:
+      | ApiVersion | Token            | ForbiddenStatusCode | ResponseParam     | ForbiddenErrorMessage                                 |
+      | v1.1       | CONFIGURED_TOKEN | 403                 | errors[0].message | Your credentials do not allow access to this resource |

@@ -1,0 +1,5 @@
+"Story","Title","Result","Date","Stability","Duration (s)"
+"oauth2 requests to twitter API","Authentication is successful","SUCCESS","2020-10-25T01:27:49.746+02:00[Europe/Paris]","0.0","4.33"
+"oauth2 requests to twitter API","Authentication is not successful with invalid token","SUCCESS","2020-10-25T01:27:54.087+02:00[Europe/Paris]","0.0","1.0"
+"oauth2 requests to twitter API","Authentication is not successful with wrong input","SUCCESS","2020-10-25T01:27:55.093+02:00[Europe/Paris]","0.0","0.86"
+"oauth2 requests to twitter API","Unauthorised in session endpoints","SUCCESS","2020-10-25T01:27:55.957+02:00[Europe/Paris]","0.0","0.41"
