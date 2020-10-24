@@ -2,32 +2,38 @@ package com.revfran.steps;
 
 import com.revfran.common.SerenityVariables;
 import io.cucumber.core.exception.CucumberException;
+import io.restassured.response.Response;
 import net.serenitybdd.core.Serenity;
-import org.junit.Assert;
+import net.serenitybdd.rest.SerenityRest;
+import org.springframework.util.StringUtils;
 
-
-import static io.restassured.RestAssured.expect;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AuthDefinitionsSteps {
-    /**
-     * Checks if token is defined, and places it in a serenity session variable
-     *
-     * @throws CucumberException if token is not defined
-     */
-    public void checkAndSetToken() throws CucumberException {
-        Optional<String> token = Optional.ofNullable(System.getProperty(SerenityVariables.TWITTER_TOKEN_ENV_NAME));
-        if (!token.isPresent()) {
-            throw new CucumberException(String.format("System property '%s' needs to be configured for the tests", SerenityVariables.TWITTER_TOKEN_ENV_NAME));
-        }
-        Serenity.setSessionVariable(SerenityVariables.TWITTER_TOKEN_SESSION_VAR_NAME).to(token.get());
-    }
 
-    public void assertStatusCode(int expectedStatusCode) {
-        int actualStatusCode = Serenity.sessionVariableCalled(SerenityVariables.RESPONSE_CODE_SESSION_VAR_NAME);
-        assertThat("Status code mismatch", actualStatusCode, is(expectedStatusCode));
+
+    /**
+     * Do a request to https://api.twitter.com/2/tweets/{tweetId}
+     *
+     * @param token   Bearer token to use
+     * @param tweetId TweetId for the url
+     */
+    public void retrieveTweetInformation(String token, String tweetId) {
+        if (StringUtils.isEmpty(token) || StringUtils.isEmpty(tweetId)) {
+            throw new CucumberException("Invalid required token or tweetId");
+        }
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", String.format("Bearer %s", token));
+
+        SerenityRest.given().contentType("application/json")
+                .headers(headers)
+                .when()
+                .get("https://api.twitter.com/2/tweets/" + tweetId);
+
+        Response response = SerenityRest.then().extract().response();
+        Serenity.setSessionVariable(SerenityVariables.RESPONSE_CODE_SESSION_VAR_NAME).to(response.statusCode());
+        Serenity.setSessionVariable(SerenityVariables.RESPONSE_BODY_SESSION_VAR_NAME).to(response.body().print());
     }
 }

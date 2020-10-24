@@ -6,12 +6,13 @@ Feature: oauth2 requests to twitter API
 
   @twitter_auth:001 @smoke
   Scenario Outline: Authentication is successful
-    When a GET request is done with valid token
+    When a GET request to get tweet "<TweetID>" is done with token "<Token>"
     Then status code is <OkStatusCode>
+    And response body contains param "<ResponseParam>" with value "<TweetID>"
 
     Examples:
-      | OkStatusCode |
-      | 200          |
+      | TweetID             | Token            | OkStatusCode | ResponseParam |
+      | 1319902909635715072 | CONFIGURED_TOKEN | 200          | data.id       |
 
   @Pending @twitter_auth:002
   Scenario: Authentication is not successful with wrong credentials

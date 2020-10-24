@@ -1,31 +1,42 @@
 package com.revfran.definitions;
 
-import com.revfran.common.SerenityVariables;
+import com.revfran.steps.AssertionSteps;
 import com.revfran.steps.AuthDefinitionsSteps;
+import com.revfran.steps.TokenSteps;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import net.serenitybdd.core.Serenity;
-import net.thucydides.core.annotations.NotImplementedException;
 import net.thucydides.core.annotations.Steps;
 
 public class AuthDefinitions {
 
     @Steps
+    TokenSteps tokenSteps;
+
+    @Steps
     AuthDefinitionsSteps authDefinitionsSteps;
+
+    @Steps
+    AssertionSteps assertionSteps;
 
     @Given("a configured token")
     public void aConfiguredToken() {
-        authDefinitionsSteps.checkAndSetToken();
+        this.tokenSteps.checkAndSetToken();
     }
 
-    @When("a GET request is done with valid token")
-    public void aGETRequestIsDoneWithValidToken() {
-        Serenity.setSessionVariable(SerenityVariables.RESPONSE_CODE_SESSION_VAR_NAME).to(100);
+    @When("a GET request to get tweet {string} is done with token {string}")
+    public void aGETRequestToGetTweetIsDoneWithToken(String tweetID, String gherkinToken) {
+        String token = this.tokenSteps.resolveTokenFromGherkin(gherkinToken);
+        this.authDefinitionsSteps.retrieveTweetInformation(token,tweetID);
     }
 
     @Then("status code is {int}")
     public void statusCodeIs(int statusCode) {
-        authDefinitionsSteps.assertStatusCode(statusCode);
+        this.assertionSteps.assertStatusCode(statusCode);
+    }
+
+    @Then("response body contains param {string} with value {string}")
+    public void responseBodyContainsParamWithValue(String param, String expectedValue) {
+        this.assertionSteps.assertStringParamInBody(param, expectedValue);
     }
 }
